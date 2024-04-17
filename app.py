@@ -5,8 +5,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 
-df_movies = pd.read_csv("cleaned_movies_data.csv")
-df_moviesDT = pd.read_csv("cleaned_movies_table_data.csv")
+df_movies = pd.read_csv("data/cleaned_movies_data.csv")
+df_moviesDT = pd.read_csv("data/cleaned_movies_table_data.csv")
 
 external_stylesheets = ['MDstyle.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
