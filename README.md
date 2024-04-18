@@ -1,4 +1,4 @@
-# MovieDashboard
+# Movie Ratings Dashboard
 
 ## Dashboard Description:
 
