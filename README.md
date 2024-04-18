@@ -1,6 +1,5 @@
 # Movie Ratings Dashboard
 
-## URL: https://moviedashboard.onrender.com/_dash-update-component
 
 ## Dashboard Description:
 
@@ -9,3 +8,6 @@
 
 
 ## Strengths and Learning Experiences: 
+
+
+### URL: https://moviedashboard.onrender.com/_dash-update-component
