@@ -1,5 +1,7 @@
 # Movie Ratings Dashboard
 
+## URL: https://moviedashboard.onrender.com/_dash-update-component
+
 ## Dashboard Description:
 
 
