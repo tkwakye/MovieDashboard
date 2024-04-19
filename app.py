@@ -110,7 +110,7 @@ app.layout = html.Div(children=[
 )
 def update_scatter_plot(selected_genres, selected_years):
     filtered_movies_per_year_genre = movies_per_year_genre.loc[selected_years[0]:selected_years[1]]
-
+    filtered_movies_per_year_genre.reset_index(inplace=True)
     fig = px.scatter(
         filtered_movies_per_year_genre.reset_index(),
         x='release_year',
