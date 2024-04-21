@@ -22,9 +22,7 @@ genres = [
 
 movie_stats = df_moviesDT.groupby(['title', 'release_date', 'genre']).agg({'rating': ['mean', 'count']}).reset_index()
 movie_stats.columns = ['Title', 'Release Date', 'Genre', 'Average Rating', 'Number of Ratings']
-movie_stats['Release Year'] = pd.to_datetime(movie_stats['Release Date']).dt.year
-# movie_stats['Release Date'] = pd.to_datetime(movie_stats['Release Date'], format="%d-%b-%Y")
-# movie_stats['Release Date'] = movie_stats['Release Date'].dt.strftime('%Y-%m-%d')
+
 
 app.layout = html.Div(children=[
     html.Div([
