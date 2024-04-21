@@ -19,10 +19,8 @@ genres = [
 ]
 # movies_per_year_genre = df_movies.groupby('release_year')[genres].sum()
 
-df_moviesDT['release_date'] = pd.to_datetime(df_moviesDT['release_date'], format='%Y', errors='coerce')
 movie_stats = df_moviesDT.groupby(['title', 'release_date', 'genre']).agg({'rating': ['mean', 'count']}).reset_index()
 movie_stats.columns = ['Title', 'Release Date', 'Genre', 'Average Rating', 'Number of Ratings']
-
 
 
 app.layout = html.Div(children=[
@@ -128,8 +126,6 @@ def update_scatter_plot(selected_genres, selected_years):
 
     fig.update_traces(marker=dict(size=8), selector=dict(mode='markers'))
 
-    fig.update_traces(marker=dict(size=5))
-    fig.update_traces(mode='lines+markers', selector=dict(name='Trendline'))
 
     fig.update_layout(
         plot_bgcolor='#BAB0AC',
@@ -179,29 +175,30 @@ def update_heatmap(selected_genres, selected_years):
 
 def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
     if selected_radio == 'top':
-        filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year >= selected_years[0]) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year <= selected_years[1])]
-        top_ten_movies = filtered_movies.groupby('title')['rating'].mean().nlargest(10)
+        top_n = 10
+        order = True
+
     else:
-        filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year >= selected_years[0]) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year <= selected_years[1])]
+        top_n = 10
+        order = False
 
-        top_ten_movies = filtered_movies.groupby('title')['rating'].mean().nsmallest(10)
+    filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
+                              (df_moviesDT['release_date'] >= selected_years[0]) &
+                              (df_moviesDT['release_date'] <= selected_years[1])]
 
-    top_ten_movies_df = top_ten_movies.to_frame().reset_index()
+    top_movies = (filtered_movies.groupby('title')['rating']
+                  .mean()
+                  .nlargest(top_n, keep='all' if order else 'first')
+                  if order else
+                  filtered_movies.groupby('title')['rating']
+                  .mean()
+                  .nsmallest(top_n, keep='all' if order else 'first'))
 
-    min_rating = top_ten_movies_df['rating'].min()
-    max_rating = top_ten_movies_df['rating'].max()
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=top_ten_movies.index, y=top_ten_movies.values,
-                         marker=dict(color='rgb(158,202,225)', line=dict(color='rgb(8,48,107)', width=1.5))))
+    fig = go.Figure(go.Bar(x=top_movies.index, y=top_movies.values,
+                           marker=dict(color='rgb(158,202,225)', line=dict(color='rgb(8,48,107)', width=1.5))))
     fig.update_layout(
         xaxis=dict(title='Movies'),
         yaxis=dict(title='Average Rating'),
-        yaxis_range=[min_rating - 0.3, max_rating],
         plot_bgcolor='#BAB0AC',
         font=dict(color='#424242'),
     )
