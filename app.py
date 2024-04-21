@@ -203,7 +203,7 @@ def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
         font=dict(color='#424242'),
     )
     return fig
-
+s
 
 @app.callback(
     Output('movie-stats-table', 'filter_query'),
@@ -217,4 +217,4 @@ def reset_filters(n_clicks):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    app.run_server(debug=True)
