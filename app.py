@@ -122,7 +122,6 @@ def update_scatter_plot(selected_genres, selected_years):
         color='genre',
         title='Number of Movies Released Over the Years by Genre',
         labels={'release_year': 'Year', 'count': 'Number of Movies Released'},
-        trendline="ols"
     )
 
     fig.update_traces(marker=dict(size=8), selector=dict(mode='markers'))
