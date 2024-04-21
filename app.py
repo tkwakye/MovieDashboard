@@ -1,9 +1,10 @@
 import dash
 from dash import dcc, html, dash_table, Input, Output
-#from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
+import statsmodels.api as sm
 
 df_movies = pd.read_csv("data/cleaned_movies_data_transformed.csv")
 df_moviesDT = pd.read_csv("data/cleaned_movies_table_data.csv")
