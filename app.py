@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 
-df_movies = pd.read_csv("data/cleaned_movies_data.csv")
+df_movies = pd.read_csv("data/cleaned_movies_data_transformed.csv")
 df_moviesDT = pd.read_csv("data/cleaned_movies_table_data.csv")
 
 external_stylesheets = ['MDstyle.css']
@@ -18,11 +18,13 @@ genres = [
     'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance',
     'Sci-Fi', 'Thriller', 'War', 'Western'
 ]
-movies_per_year_genre = df_movies.groupby('release_year')[genres].sum()
+# movies_per_year_genre = df_movies.groupby('release_year')[genres].sum()
+
 movie_stats = df_moviesDT.groupby(['title', 'release_date', 'genre']).agg({'rating': ['mean', 'count']}).reset_index()
 movie_stats.columns = ['Title', 'Release Date', 'Genre', 'Average Rating', 'Number of Ratings']
-movie_stats['Release Date'] = pd.to_datetime(movie_stats['Release Date'], format="%d-%b-%Y")
-movie_stats['Release Date'] = movie_stats['Release Date'].dt.strftime('%Y-%m-%d')
+movie_stats['Release Year'] = pd.to_datetime(movie_stats['Release Date']).dt.year
+# movie_stats['Release Date'] = pd.to_datetime(movie_stats['Release Date'], format="%d-%b-%Y")
+# movie_stats['Release Date'] = movie_stats['Release Date'].dt.strftime('%Y-%m-%d')
 
 app.layout = html.Div(children=[
     html.Div([
@@ -109,26 +111,35 @@ app.layout = html.Div(children=[
      Input('year-slider', 'value')]
 )
 def update_scatter_plot(selected_genres, selected_years):
-    filtered_movies_per_year_genre = movies_per_year_genre.loc[selected_years[0]:selected_years[1]]
-    filtered_movies_per_year_genre.reset_index(inplace=True)
-    fig = px.scatter(
-        filtered_movies_per_year_genre.reset_index(),
-        x='release_year',
-        y=selected_genres,
+    filtered_movies = df_movies[df_movies['genre'].isin(selected_genres) &
+                                (df_movies['release_year'] >= selected_years[0]) &
+                                (df_movies['release_year'] <= selected_years[1])]
 
-        title="",
-        trendline="ols",
-        labels={'release_year': 'Year', 'value': 'Number of Movies Released Per Year'}
+    movies_per_year_genre_filtered = filtered_movies.groupby(['release_year', 'genre']).size().reset_index(name='count')
+
+    fig = px.scatter(
+        movies_per_year_genre_filtered,
+        x='release_year',
+        y='count',
+        color='genre',
+        title='Number of Movies Released Over the Years by Genre',
+        labels={'release_year': 'Year', 'count': 'Number of Movies Released'},
+        trendline="ols"
     )
+
+    fig.update_traces(marker=dict(size=8), selector=dict(mode='markers'))
+
     fig.update_traces(marker=dict(size=5))
     fig.update_traces(mode='lines+markers', selector=dict(name='Trendline'))
+
     fig.update_layout(
         plot_bgcolor='#BAB0AC',
         font=dict(color='#424242'),
-        xaxis=dict(title_font=dict(family='Arial', size=13, color='black')),
-        yaxis=dict(title_font=dict(family='Arial', size=13, color='black')),
-        title=""
+        xaxis=dict(title='Year'),
+        yaxis=dict(title='Number of Movies Released')
+
     )
+
     return fig
 
 
@@ -138,20 +149,21 @@ def update_scatter_plot(selected_genres, selected_years):
      Input('year-slider', 'value')]
 )
 def update_heatmap(selected_genres, selected_years):
-    filtered_movies_per_year_genre = movies_per_year_genre.loc[selected_years[0]:selected_years[1]]
-    filtered_movies_per_year_genre.reset_index(inplace=True)
+    filtered_movies = df_movies[df_movies['genre'].isin(selected_genres) &
+                                (df_movies['release_year'] >= selected_years[0]) &
+                                (df_movies['release_year'] <= selected_years[1])]
 
-    pivot_df = filtered_movies_per_year_genre.pivot_table(index='release_year', values=selected_genres)
+    pivot_df = filtered_movies.pivot_table(index='release_year', columns='genre', aggfunc='size', fill_value=0)
 
     fig = px.imshow(
         pivot_df,
         labels=dict(x="Genre", y="Release Year", color="Number of Movies"),
-        title="",
+        title="Number of Movies Released Over the Years by Genre",
         color_continuous_scale='blues'
     )
 
     fig.update_layout(
-        plot_bgcolor='brown',
+        plot_bgcolor='#BAB0AC',
         font=dict(family='Arial', size=12, color='black'),
         yaxis=dict(tickfont=dict(size=10)),
     )
@@ -167,29 +179,30 @@ def update_heatmap(selected_genres, selected_years):
 )
 def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
     if selected_radio == 'top':
-        filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year >= selected_years[0]) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year <= selected_years[1])]
-        top_ten_movies = filtered_movies.groupby('title')['rating'].mean().nlargest(10)
+        top_n = 10
+        order = True
+
     else:
-        filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year >= selected_years[0]) &
-                                      (pd.to_datetime(df_moviesDT['release_date']).dt.year <= selected_years[1])]
+        top_n = 10
+        order = False
 
-        top_ten_movies = filtered_movies.groupby('title')['rating'].mean().nsmallest(10)
+    filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
+                                  (df_moviesDT['release_date'] >= selected_years[0]) &
+                                  (df_moviesDT['release_date'] <= selected_years[1])]
 
-    top_ten_movies_df = top_ten_movies.to_frame().reset_index()
+    top_movies = (filtered_movies.groupby('title')['rating']
+                  .mean()
+                  .nlargest(top_n, keep='all' if order else 'first')
+                  if order else
+                  filtered_movies.groupby('title')['rating']
+                  .mean()
+                  .nsmallest(top_n, keep='all' if order else 'first'))
 
-    min_rating = top_ten_movies_df['rating'].min()
-    max_rating = top_ten_movies_df['rating'].max()
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=top_ten_movies.index, y=top_ten_movies.values,
-                         marker=dict(color='rgb(158,202,225)', line=dict(color='rgb(8,48,107)', width=1.5))))
+    fig = go.Figure(go.Bar(x=top_movies.index, y=top_movies.values,
+                           marker=dict(color='rgb(158,202,225)', line=dict(color='rgb(8,48,107)', width=1.5))))
     fig.update_layout(
         xaxis=dict(title='Movies'),
         yaxis=dict(title='Average Rating'),
-        yaxis_range=[min_rating - 0.3, max_rating],
         plot_bgcolor='#BAB0AC',
         font=dict(color='#424242'),
     )
@@ -208,4 +221,4 @@ def reset_filters(n_clicks):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8000)
