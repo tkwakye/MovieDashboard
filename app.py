@@ -181,14 +181,15 @@ def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
     if selected_radio == 'top':
         top_n = 10
         order = True
-
     else:
         top_n = 10
         order = False
 
+    df_moviesDT['release_date'] = pd.to_datetime(df_moviesDT['release_date'])
+
     filtered_movies = df_moviesDT[(df_moviesDT['genre'].isin(selected_genres)) &
-                              (df_moviesDT['release_date'] >= selected_years[0]) &
-                              (df_moviesDT['release_date'] <= selected_years[1])]
+                                  (df_moviesDT['release_date'].dt.year >= selected_years[0]) &
+                                  (df_moviesDT['release_date'].dt.year <= selected_years[1])]
 
     top_movies = (filtered_movies.groupby('title')['rating']
                   .mean()
