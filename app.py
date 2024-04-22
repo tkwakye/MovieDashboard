@@ -21,25 +21,43 @@ genres = [
 # movies_per_year_genre = df_movies.groupby('release_year')[genres].sum()
 
 movie_stats = df_moviesDT.groupby(['title', 'release_date', 'genre']).agg({'rating': ['mean', 'count']}).reset_index()
-movie_stats.columns = ['Title', 'Release Date', 'Genre', 'Average Rating', 'Number of Ratings']
+movie_stats.columns = ['Title', 'Release Year', 'Genre', 'Average Rating', 'Number of Ratings']
 
 app.layout = html.Div(children=[
     html.Div([
-        html.H1("Movie Ratings Through the Years", className="mt-5 mb-4 text-center",
-                style={'font-family': 'verdana', 'font-size': '20px', 'color': 'white'}),
+        html.H1("Movie Analytics Console", className="mt-5 mb-4 text-center",
+                style={'font-family': 'verdana', 'font-size': '45px', 'color': 'white'}),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC',
               'text-align': 'center'}),
     html.Div([
-        html.H1("Top Ten Rated Movies and Their Average Ratings", className="mt-5 mb-4 text-center",
-                style={'font-family': 'verdana', 'font-size': '15px', 'color': 'white'}),
+        html.Div([
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+            html.Img(src="assets/clapper.jpg", style={'height': '100px', 'width': '150px'}),
+        ], style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+    ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC',
+              'text-align': 'center'}),
+
+    html.Div([
+        html.H1("Top Ten And Worst Ten Rated Movies", className="mt-5 mb-4 text-center",
+                style={'font-family': 'verdana', 'font-size': '30px', 'color': 'white'}),
         dcc.RadioItems(
             id='switch-radio',
             options=[
                 {'label': 'Top Rated Movies', 'value': 'top'},
-                {'label': 'Lowest Rated Movies', 'value': 'bottom'}
+                {'label': 'Worst Rated Movies', 'value': 'bottom'}
             ],
             value='top',
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'}
+            labelStyle={'display': 'inline-block', 'margin-right': '20px', 'color': 'white', 'font-family': 'verdana',
+                        'font-size': '15px'}
         ),
         dcc.RangeSlider(
             id='bar-graph-slider',
@@ -57,14 +75,14 @@ app.layout = html.Div(children=[
             options=[{'label': genre, 'value': genre} for genre in genres],
             value=['Action'],
             className="form-check-input",
-            style={'columnCount': 3}
+            style={'columnCount': 3, 'color': 'white', 'font-family': 'verdana', 'font-size': '15px'}
         ),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
     html.Div([
         html.H1("Movies Genres over the Years", className="mt-5 mb-4 text-center",
-                style={'font-family': 'verdana', 'font-size': '15px', 'color': 'white'}),
+                style={'font-family': 'verdana', 'font-size': '30px', 'color': 'white'}),
         html.Label("Select Genre(s):", className="font-weight-bold",
-                   style={'font-family': 'Arial', 'font-size': '15px', 'color': 'white'}),
+                   style={'font-family': 'verdana', 'font-size': '15px', 'color': 'white'}),
         dcc.Dropdown(
             id='genre-dropdown',
             options=[{'label': genre, 'value': genre} for genre in genres],
@@ -85,8 +103,8 @@ app.layout = html.Div(children=[
         dcc.Graph(id='movies-heatmap', style={'height': '300px', 'width': '50%', 'display': 'inline-block'}),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
     html.Div([
-        html.H1("Movie Statistics Data Table", className="mt-5 mb-4 text-center",
-                style={'font-family': 'verdana', 'font-size': '15px', 'color': 'white'}),
+        html.H1("Movie Statistics", className="mt-5 mb-4 text-center",
+                style={'font-family': 'verdana', 'font-size': '30px', 'color': 'white'}),
         dash_table.DataTable(
             id='movie-stats-table',
             columns=[{"name": i, "id": i} for i in movie_stats.columns],
@@ -209,8 +227,17 @@ def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
                   .mean()
                   .nsmallest(top_n, keep='all' if order else 'first'))
 
-    fig = go.Figure(go.Bar(x=top_movies.index, y=top_movies.values,
-                           marker=dict(color='rgb(158,202,225)', line=dict(color='rgb(8,48,107)', width=1.5))))
+    fig = go.Figure()
+    genre_colors = px.colors.qualitative.Set3[:len(selected_genres)]
+
+    for i, genre in enumerate(selected_genres):
+        genre_movies = top_movies[top_movies.index.isin(filtered_movies[filtered_movies['genre'] == genre]['title'])]
+        fig.add_trace(go.Bar(
+            x=genre_movies.index,
+            y=genre_movies.values,
+            name=genre,
+            marker=dict(color=genre_colors[i])
+        ))
     fig.update_layout(
         xaxis=dict(title='Movies'),
         yaxis=dict(title='Average Rating'),
