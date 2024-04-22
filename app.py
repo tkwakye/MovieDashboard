@@ -101,7 +101,7 @@ app.layout = html.Div(children=[
         html.Button('Reset Filters', id='reset-button', n_clicks=0),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
     html.Div([
-                html.A(html.Img(src="gitimage.jpg", style={'height': '50px', 'width': '50px'}), href="https://github.com/tkwakye/MovieRatingsDashboard",
+                html.A(html.Img(src="data/gitimage.jpg", style={'height': '50px', 'width': '50px'}), href="https://github.com/tkwakye/MovieRatingsDashboard",
                     style={'position': 'fixed', 'bottom': '20px', 'right': '20px'}),
     ])
 ], style={})
