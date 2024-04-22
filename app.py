@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html, dash_table, Input, Output
-from dash.dependencies import Input, Output
+#from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
@@ -149,7 +149,11 @@ def update_heatmap(selected_genres, selected_years):
                                 (df_movies['release_year'] <= selected_years[1])]
 
     pivot_df = filtered_movies.pivot_table(index='release_year', columns='genre', aggfunc='size', fill_value=0)
+    print("Data type of 'release_year' column:")
+    print(filtered_movies['release_year'].dtype)
 
+    print("\nData type of 'selected_years' variable:")
+    print(type(selected_years[0]))
     fig = px.imshow(
         pivot_df,
         labels=dict(x="Genre", y="Release Year", color="Number of Movies"),
@@ -204,6 +208,7 @@ def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
     )
     return fig
 
+
 @app.callback(
     Output('movie-stats-table', 'filter_query'),
     [Input('reset-button', 'n_clicks')]
@@ -213,6 +218,7 @@ def reset_filters(n_clicks):
         return ''
     else:
         raise dash.exceptions.PreventUpdate
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
