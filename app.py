@@ -23,7 +23,6 @@ genres = [
 movie_stats = df_moviesDT.groupby(['title', 'release_date', 'genre']).agg({'rating': ['mean', 'count']}).reset_index()
 movie_stats.columns = ['Title', 'Release Date', 'Genre', 'Average Rating', 'Number of Ratings']
 
-
 app.layout = html.Div(children=[
     html.Div([
         html.H1("Movie Ratings Through the Years", className="mt-5 mb-4 text-center",
@@ -101,9 +100,18 @@ app.layout = html.Div(children=[
         html.Button('Reset Filters', id='reset-button', n_clicks=0),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
     html.Div([
-                html.A(html.Img(src="data/gitimage.jpg", style={'height': '50px', 'width': '50px'}), href="https://github.com/tkwakye/MovieRatingsDashboard",
-                    style={'position': 'fixed', 'bottom': '20px', 'right': '20px'}),
+        html.A(
+            href="https://github.com/tkwakye/MovieRatingsDashboard",
+            children=[
+                html.Img(
+                    src="assets/git.png", style={'height': '60px', 'width': '60px'},
+                )
+            ],
+            style={'position': 'fixed', 'bottom': '20px', 'right': '20px'}
+        )
+
     ])
+
 ], style={})
 
 
@@ -129,7 +137,6 @@ def update_scatter_plot(selected_genres, selected_years):
     )
 
     fig.update_traces(marker=dict(size=8), selector=dict(mode='markers'))
-
 
     fig.update_layout(
         plot_bgcolor='#BAB0AC',
@@ -180,7 +187,6 @@ def update_heatmap(selected_genres, selected_years):
      Input('bar-graph-slider', 'value'),
      Input('switch-radio', 'value')]
 )
-
 def update_top_ten_movies_bar(selected_genres, selected_years, selected_radio):
     if selected_radio == 'top':
         top_n = 10
