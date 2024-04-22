@@ -59,7 +59,7 @@ app.layout = html.Div(children=[
             value=['Action'],
             className="form-check-input",
             style={'columnCount': 3}
-        )
+        ),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
     html.Div([
         html.H1("Movies Genres over the Years", className="mt-5 mb-4 text-center",
@@ -100,6 +100,10 @@ app.layout = html.Div(children=[
         ),
         html.Button('Reset Filters', id='reset-button', n_clicks=0),
     ], style={'width': '100%', 'display': 'inline-block', 'padding': '50px', 'backgroundColor': '#BAB0AC'}),
+    html.Div([
+                html.A(html.Img(src="gitimage.jpg", style={'height': '50px', 'width': '50px'}), href="https://github.com/tkwakye/MovieRatingsDashboard",
+                    style={'position': 'fixed', 'bottom': '20px', 'right': '20px'}),
+    ])
 ], style={})
 
 
