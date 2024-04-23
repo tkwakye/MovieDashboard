@@ -11,4 +11,4 @@
 ## Strengths and Learning Experiences: 
 ### I am able to learn different ways to utilize Dash components in an effective manner. I am also able to conceptulize how the different components of the application can be used to contribute to interactivity. I am currently learing how to expand my knowledgee in UI/UX to be more visually appealing.
 
-### URL: https://moviedashboard.onrender.com/_dash-update-component
+### URL: https://moviedashboard.onrender.com/_dash-update-component](https://movieratingsdashboard.onrender.com/)
